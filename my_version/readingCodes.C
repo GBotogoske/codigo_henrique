@@ -782,7 +782,7 @@ public:
     Double_t slowcomp = 0;
     ch.charge=0;
     ch.charge_m=0;
-    ch.channel=nch;
+    ch.chan=nch;
     navg[nch]++;
     navg_t++;
     for(Int_t i = 0; i<memorydepth; i++){
