@@ -229,6 +229,12 @@ public:
   Double_t timestamp = 0;
   Double_t deltastamp = 0;
   Double_t temptime = 0;
+  
+  Double_t R = 50.0;
+  
+  Bool_t ADC_channel = true;
+  Int_t wavedump_baseline = 10;	
+  Double_t conversion_ADC = 2000/((pow(2,14)-1)*(1-wavedump_baseline/100));
 
   string file_extension = ".txt";
   
@@ -501,12 +507,33 @@ public:
       f1->WriteObject(gavg[i],Form("average_ch%i",channels[i]),"TObject::kOverwrite");
     }
     
-    gavg_t = new TGraph(memorydepth,&time[0],&avg_t[0]);
-    f1->WriteObject(gavg_t,Form("average_ch_t"),"TObject::kOverwrite");
-//     f1->Close();
-
-    // htests->Draw();
+   TCanvas *c = new TCanvas();
+   c->SetCanvasSize(1400, 600);
+   c->SetWindowSize(1500, 1500);
+   
+   gavg_t = new TGraph(memorydepth,&time[0],&avg_t[0]); 
+   gavg_t->Draw("");
+   
+   TLine* l1 = new TLine(startCharge,gavg_t->GetYaxis()->GetXmin(),startCharge,gavg_t->GetYaxis()->GetXmax());
+   l1->SetLineColor(kRed);
+   l1->SetLineWidth(2);
+   l1->Draw("");
+   
+   TLine* l2 = new TLine(chargeTime,gavg_t->GetYaxis()->GetXmin(),chargeTime,gavg_t->GetYaxis()->GetXmax());
+   l2->SetLineColor(kRed);
+   l2->SetLineWidth(2);
+   l2->Draw(""); 
     
+   TLine* l3 = new TLine(chargeTime_menor,gavg_t->GetYaxis()->GetXmin(),chargeTime_menor,gavg_t->GetYaxis()->GetXmax());
+   l3->SetLineColor(kBlue);
+   l3->SetLineWidth(2);
+   l3->Draw("");  
+    
+   f1->WriteObject(gavg_t,Form("average_ch_t"),"TObject::kOverwrite");
+   f1->WriteObject(c,Form("average_ch_t_canvas"),"TObject::kOverwrite");
+   
+   c->Close(); 
+   
   }
   
 
@@ -531,6 +558,10 @@ public:
     
     DENOISE dn;
     
+    if(ADC_channel==false)
+    {
+    	conversion_ADC = 2000/((pow(2,14)-1)*(1-wavedump_baseline/100));	
+    }
 
     if(dtime == 2)  timeResolution = 8e-9; // 8 ns for 2 ns step, 16 ns for 4 ns step
     if(dtime == 4)  timeResolution = 16e-9; // 16 ns for 4 ns step
@@ -788,6 +819,12 @@ public:
     for(Int_t i = 0; i<memorydepth; i++){
       ch.wvf[i] = ch.wvf[i]-bl;
       filtered[i] = filtered[i]-bl;
+      if(ADC_channel==false)
+      {
+         ch.wvf[i] = ch.wvf[i]*conversion_ADC;
+      	 filtered[i] = filtered[i]*conversion_ADC;
+      }
+      
       avg[nch][i]+=ch.wvf[i];
       avg_t[i]+=ch.wvf[i];
 //       cout << i << " " << ch.wvf[i] << endl;
@@ -811,6 +848,12 @@ public:
       }
       
     }
+    
+  	if(ADC_channel==false)
+  	{
+    		ch.charge_m=ch.charge_m/R;
+    		ch.charge=ch.charge/R;
+    	}	
 //     cout << fastcomp << " " << slowcomp << endl;
     ch.fprompt = fastcomp/slowcomp;
   }
