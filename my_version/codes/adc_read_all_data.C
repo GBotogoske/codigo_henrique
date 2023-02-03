@@ -17,9 +17,12 @@ void adc_read_all_data(){
     r.dtime = 4; // step time in ns
     r.nbits = 14; // this is used only for baseline histogram, changing it to 12 might help
     r.isBinary = true;
+    r.ADC_channel = false;
+    r.wavedump_baseline = 10;
     
-    r.baselineTime = 24000; // time limit for baseline
+    r.baselineTime = 4000; // time limit for baseline
     r.chargeTime = 14000; // last time to integrate
+    r.chargeTime_menor = 8000;
     r.startCharge = 4000;
     r.maxRange = 24000; // max range to search for amplitude peak
     r.fast = 200; // fprompt fast integration time
