@@ -6,7 +6,7 @@ void mycharge()
 	TFile* _f= new TFile("analyzed.root","UPDATE");
 	
 	//ratio das cargas para filtar
-	float I=0.4;
+	float I=0.6;
 	
 	//Abrir arvore t2 ("ambos os canais")
 	TTree *t2 = (TTree*)_f->Get("t2");
@@ -34,7 +34,7 @@ void mycharge()
 	
 	//le o numero de entradas na t root: 2 x numeros de triggers pego ( 2 canais )
 	Int_t entries=(Int_t)t2->GetEntries();
-  	cout<< "Entries = " << entries << "   " << endl;;
+  	cout<< "Entries = " << entries << "   " << endl;
 	//------------------------------------------------------------------
 
 
@@ -52,15 +52,19 @@ void mycharge()
 	branch1->SetAddress(&ch_read);
 	
 	//cria o branch em nova ttree
-	tc->Branch("Channel_Charge",&ch_write1,ch_write1.tobranch.c_str());
-	td->Branch("Channel_Charge",&ch_write2,ch_write2.tobranch.c_str());
+	tc->Branch("Ch_c",&ch_write1,ch_write1.tobranch.c_str());
+	td->Branch("Ch_c",&ch_write2,ch_write2.tobranch.c_str());
 	
 //----------------------------------------------	
 	//sinais medios
 	vector<Double_t> avg_c;
   	vector<Double_t> avg_d;
+  	vector<Double_t> log_avg_c;
+  	vector<Double_t> log_avg_d;
+  	
   	vector<Double_t> time;
-	
+  	vector<Double_t> log_time;
+
 	avg_c.resize(memorydepth,0);
 	avg_d.resize(memorydepth,0);
 	time.resize(memorydepth,0);
@@ -105,13 +109,14 @@ void mycharge()
 	{
       		time[j] = j*4;
     	}
-	
+    	
+
 	for(Int_t j = 0; j<memorydepth; j++)
 	{
         	avg_c[j] = avg_c[j]/nc;
         	avg_d[j] = avg_d[j]/nd;
       	}
-	
+      	
 	TGraph* graph_c;
 	graph_c = new TGraph(memorydepth,&time[0],&avg_c[0]);
 	
@@ -119,5 +124,6 @@ void mycharge()
 	graph_d = new TGraph(memorydepth,&time[0],&avg_d[0]);
 	
 	_f->WriteObject(graph_c,Form("average_ch_c"),"TObject::kOverwrite");
-	_f->WriteObject(graph_d,Form("average_ch_d"),"TObject::kOverwrite");	
+	_f->WriteObject(graph_d,Form("average_ch_d"),"TObject::kOverwrite");
+	
 }
